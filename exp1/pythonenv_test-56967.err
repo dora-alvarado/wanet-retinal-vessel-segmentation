@@ -1,0 +1,7 @@
+/home/est_posgrado_dora.alvarado/.conda/envs/py3-torch/lib/python3.7/site-packages/torch/nn/functional.py:3385: UserWarning: Default grid_sample and affine_grid behavior has changed to align_corners=False since 1.3.0. Please specify align_corners=True if the old behavior is desired. See the documentation of grid_sample for details.
+  warnings.warn("Default grid_sample and affine_grid behavior has changed "
+/home/est_posgrado_dora.alvarado/2021/WANet/trainer/adamwr/adamw.py:72: UserWarning: This overload of add_ is deprecated:
+	add_(Number alpha, Tensor other)
+Consider using one of the following signatures instead:
+	add_(Tensor other, *, Number alpha) (Triggered internally at  /pytorch/torch/csrc/utils/python_arg_parser.cpp:882.)
+  exp_avg.mul_(beta1).add_(1 - beta1, grad)

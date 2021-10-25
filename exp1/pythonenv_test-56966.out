@@ -1,0 +1,5 @@
+['21.tif' '22.tif' '23.tif' '24.tif' '25.tif' '26.tif' '27.tif' '28.tif'
+ '29.tif' '30.tif' '31.tif' '32.tif' '33.tif' '34.tif' '35.tif' '36.tif'
+ '37.tif' '38.tif' '39.tif' '40.tif']
+=> loading checkpoint './exp1/model_checkpoint.pth.tar'
+=> loaded checkpoint './exp1/model_checkpoint.pth.tar' (epoch 2)
