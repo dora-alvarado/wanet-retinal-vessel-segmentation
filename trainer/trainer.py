@@ -4,15 +4,17 @@ import random
 import os
 import shutil
 from .metrics import accuracy
+import logging
 
 
 class Trainer(object):
 
-    def __init__(self, model, optimizer, criteria=torch.nn.CrossEntropyLoss, metric=accuracy, scheduler=None, seed=0):
+    def __init__(self, model, optimizer, criteria=torch.nn.CrossEntropyLoss, metric=accuracy, metric_name = 'acc', scheduler=None, seed=0):
         self.model = model
         self.optimizer = optimizer
         self.criteria = criteria
         self.metric = metric
+        self.metric_name = metric_name
         self.scheduler = scheduler
         self.seed = seed
         self.use_cuda = torch.cuda.is_available()
@@ -21,6 +23,8 @@ class Trainer(object):
         self.best_metric = 0
         self.start_epoch = 0
         self.manual_seed()
+        self.model_path = './exp'
+        self.logger = None
 
     def manual_seed(self):
         torch.manual_seed(self.seed)
@@ -101,44 +105,68 @@ class Trainer(object):
         if is_best:
             shutil.copyfile(model_path, model_dir + '/model_best.pth.tar')
 
-    def resume(self, model_dir):
+    def resume(self, model_path):
         # Note: Input model & optimizer should be pre-defined.  This routine only updates their states.
         self.set_device()
-        self.model_dir = model_dir
-        if os.path.isfile(model_dir):
-            print("=> loading checkpoint '{}'".format(model_dir))
-            state = torch.load(model_dir, map_location=torch.device('cpu'))
+        self.model_path = model_path
+        model_dir = os.path.dirname(os.path.abspath(model_path))
+        self.logger = logging.getLogger(__name__)
+        self.start_epoch = 1
+        self.init_logger(model_dir + '/training.log')
+        if os.path.isfile(model_path):
+            self.logger.info("=> loading checkpoint '%s'", model_path)
+            state = torch.load(model_path, map_location=torch.device('cpu'))
             self.start_epoch = state['epoch']+1
             self.model.load_state_dict(state['state_dict'])
             self.optimizer.load_state_dict(state['optimizer'])
             self.best_metric = state['best_metric']
             self.best_loss = state['best_loss']
-            print("=> loaded checkpoint '{}' (epoch {})"
-                  .format(model_dir, state['epoch']+1))
+            self.logger.info("=> loaded checkpoint '%s' (epoch %d)", model_path, state['epoch'] + 1)
         else:
-            print("=> no checkpoint found at '{}'".format(model_dir))
+            self.logger.info("=> no checkpoint found at '%s'", model_path)
+
+    def init_logger(self, path):
+        filemode = 'w' if self.start_epoch==0 else 'a'
+        self.logger.setLevel(logging.DEBUG)
+        # create console handler and set level to debug
+        ch = logging.FileHandler(path, mode=filemode, encoding='utf-8')
+        ch.setLevel(logging.DEBUG)
+        # create formatter
+        formatter = logging.Formatter('%(asctime)s - %(name)s - %(message)s')
+        # add formatter to ch
+        ch.setFormatter(formatter)
+        # add ch to logger
+        self.logger.addHandler(ch)
 
     def __call__(self, dataloaders, n_epochs, model_dir):
         self.set_device()
-        self.model_dir = model_dir
+        self.model_path = model_dir
+
+        if not os.path.exists(model_dir):
+            os.makedirs(model_dir)
+
+        if self.logger is None:
+            self.logger = logging.getLogger(__name__)
+            self.init_logger(model_dir + '/training.log')
+
         for epoch in range(self.start_epoch, n_epochs):
             train_loss, train_metric = self.train_step(dataloaders['train'])
             val_loss, val_metric = self.val_step(dataloaders['val'])
             self.save_checkpoint(epoch, model_dir)
             if val_loss < self.best_loss:
-                print('val_loss improved from %.4f to %.4f, saving model to path' % (self.best_loss, val_loss))
+                self.logger.info('val_loss improved from %.4f to %.4f, saving model to path', self.best_loss, val_loss)
                 self.best_loss = val_loss
                 self.best_metric = val_metric
                 self.save_checkpoint(epoch, model_dir, is_best=True)
             epoch_data = {'loss': train_loss,
-                          'metric': train_metric,
+                          self.metric_name: train_metric,
                           'val_loss': val_loss,
-                          'val_metric': val_metric,
+                          'val_'+self.metric_name: val_metric,
                           'best_val_loss': self.best_loss,
-                          'best_val_metric': self.best_metric}
+                          'best_val_'+self.metric_name: self.best_metric}
 
             str1 = [' %s: %.4f ' % item for item in epoch_data.items()]
-            print('Epoch %04d/%04d: %s' % (epoch + 1, n_epochs, '-'.join(str1)))
+            self.logger.info('Epoch %04d/%04d: %s', epoch + 1, n_epochs, '-'.join(str1))
 
         if self.use_cuda:
             torch.cuda.empty_cache()
