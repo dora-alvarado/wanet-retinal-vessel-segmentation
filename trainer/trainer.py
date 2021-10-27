@@ -142,9 +142,6 @@ class Trainer(object):
         self.set_device()
         self.model_path = model_dir
 
-        if not os.path.exists(model_dir):
-            os.makedirs(model_dir)
-
         if self.logger is None:
             self.logger = logging.getLogger(__name__)
             self.init_logger(model_dir + '/training.log')

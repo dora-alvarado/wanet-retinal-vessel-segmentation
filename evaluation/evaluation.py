@@ -4,10 +4,11 @@ import torchvision.transforms.functional as TF
 import numpy as np
 from .extract_patches import patches_overlap, recompone_overlap
 from .performance import performance
+import logging
 
 class Evaluation(object):
 
-    def __init__(self, model, patch_size, batch_size=32, stride=5):
+    def __init__(self, model, patch_size, batch_size=32, stride=5, logfile_path = './performance.log'):
         self.model = model
         self.patch_size = patch_size
         self.batch_size = batch_size
@@ -15,6 +16,21 @@ class Evaluation(object):
         self.use_cuda = torch.cuda.is_available()
         self.device = torch.device("cuda:0" if self.use_cuda else "cpu")
         self.lst_predictions = None
+        self.logfile_path = logfile_path
+        self.logger = logging.getLogger(__name__)
+        self.init_logger(logfile_path)
+
+    def init_logger(self, logfile_path):
+        self.logger.setLevel(logging.DEBUG)
+        # create console handler and set level to debug
+        ch = logging.FileHandler(logfile_path, mode='w', encoding='utf-8')
+        ch.setLevel(logging.DEBUG)
+        # create formatter
+        formatter = logging.Formatter('%(message)s')
+        # add formatter to ch
+        ch.setFormatter(formatter)
+        # add ch to logger
+        self.logger.addHandler(ch)
 
     def chunk(self, lst, batch_size):
         for i in range(0, len(lst), batch_size):
@@ -41,7 +57,7 @@ class Evaluation(object):
         y_scores = []
         y_true =[]
         n_imgs = len(self.lst_predictions)
-        print(n_imgs)
+
         for i in range(n_imgs):
             pred = self.lst_predictions[i].reshape(-1)
 
@@ -59,7 +75,7 @@ class Evaluation(object):
 
         metrics = performance(y_scores, y_true)
         str1 = ['%s: %.4f ' % item for item in metrics.items()]
-        print('%s' % '\n'.join(str1))
+        self.logger.info('%s', '\n'.join(str1))
         return metrics
 
     def __call__(self, dataset, n_imgs, inside_FoV=True):
