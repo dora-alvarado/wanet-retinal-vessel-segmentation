@@ -11,11 +11,12 @@ from trainer.optimizer import optimizer_func as optim_selector
 from trainer.trainer import Trainer
 from model.wanet import WANet
 from trainer.adamwr.cyclic_scheduler import CyclicLRWithRestarts
-from utils.settings import setup_parser
+from utils.settings import setup_parser, save_config
 
 
 if __name__=='__main__':
     config = setup_parser()
+    save_config(config, config.experiment + 'train_config.txt')
     dataset_config = get_dataset_settings(config.dataset)(config.path_dataset)
 
     listOfFiles_imgs = np.sort(np.asarray(os.listdir(dataset_config['path_train_imgs'])))

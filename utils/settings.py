@@ -1,6 +1,6 @@
 import configparser
 import argparse
-
+import os
 
 def setup_parser():
     conf_parser = argparse.ArgumentParser(add_help=False)
@@ -12,16 +12,16 @@ def setup_parser():
         'dataset'      : 'DRIVE',
         'experiment'   : './test_DRIVE/',
         'crop_size'    : 48,
-        'num_patches'  : 64,
-        'num_epochs'   : 1,
+        'num_patches'  : 25000,
+        'num_epochs'   : 50,
         'batch_size'   : 32,
         'optimizer'    : 'AdamW',
         'learning_rate': 1e-3,
         'resume'       : False,
         'best'         : True,
-        'stride'       : 30,
-        'num_imgs'     : 3,
-        'num_group'    : 3,
+        'stride'       : 5,
+        'num_imgs'     : 20,
+        'num_group'    : 4,
     }
 
     if args.config:
@@ -69,29 +69,31 @@ def setup_parser():
     group.add_argument('--num_group', type=int, help='Number of images per row for visualization')
 
     args = parser.parse_args(remaining_argv)
-    print(args)
     return args
 
 
 def save_config(args, path):
     config = configparser.ConfigParser()
-    config['DEFAULT'] = {'path_dataset': args['path_dataset'],
-                         'dataset': args['dataset'],
-                         'experiment': args['experiment'],
-                         'crop_size': args['crop_size']
+    config['DEFAULT'] = {'path_dataset': args.path_dataset,
+                         'dataset': args.dataset,
+                         'experiment': args.experiment,
+                         'crop_size': args.crop_size
                          }
-    config['TRAINING'] = {'num_patches': args['num_patches'],
-                          'num_epochs': args['num_epochs'],
-                          'batch_size': args['batch_size'],
-                          'optimizer': args['optimizer'],
-                          'learning_rate': args['learning_rate'],
-                          'resume': args['resume']
+    config['TRAINING'] = {'num_patches': args.num_patches,
+                          'num_epochs': args.num_epochs,
+                          'batch_size': args.batch_size,
+                          'optimizer': args.optimizer,
+                          'learning_rate': args.learning_rate,
+                          'resume': args.resume
                           }
-    config['TEST'] = {'best': args['best'],
-                      'stride': args['stride'],
-                      'num_imgs': args['num_imgs'],
-                      'num_group': args['num_group']
+    config['TEST'] = {'best': args.best,
+                      'stride': args.stride,
+                      'num_imgs': args.num_imgs,
+                      'num_group': args.num_group
                       }
+    model_dir = os.path.dirname(os.path.abspath(path))
+    if not os.path.exists(model_dir):
+        os.makedirs(model_dir)
 
     with open(path, 'w') as configfile:
         config.write(configfile)

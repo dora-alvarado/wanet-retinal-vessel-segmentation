@@ -14,7 +14,7 @@ resume = False
 
 [TEST]
 best = True
-stride = 30
+stride = 5
 num_imgs = 20
 num_group = 5
 
