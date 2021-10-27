@@ -10,7 +10,7 @@ def setup_parser():
     defaults = {
         'path_dataset' : './datasets/',
         'dataset'      : 'DRIVE',
-        'experiment'   : 'test_DRIVE',
+        'experiment'   : './test_DRIVE/',
         'crop_size'    : 48,
         'num_patches'  : 64,
         'num_epochs'   : 1,
