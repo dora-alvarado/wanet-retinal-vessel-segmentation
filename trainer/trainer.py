@@ -23,7 +23,7 @@ class Trainer(object):
         self.best_metric = 0
         self.start_epoch = 0
         self.manual_seed()
-        self.model_path = './exp'
+        self.model_path = './exp/'
         self.logger = None
 
     def manual_seed(self):
@@ -99,11 +99,11 @@ class Trainer(object):
         # save
         if not os.path.exists(model_dir):
             os.makedirs(model_dir)
-        model_path = model_dir + "/model_checkpoint.pth.tar"
+        model_path = model_dir + "model_checkpoint.pth.tar"
 
         torch.save(state, model_path)
         if is_best:
-            shutil.copyfile(model_path, model_dir + '/model_best.pth.tar')
+            shutil.copyfile(model_path, model_dir + 'model_best.pth.tar')
 
     def resume(self, model_path):
         # Note: Input model & optimizer should be pre-defined.  This routine only updates their states.
@@ -141,6 +141,8 @@ class Trainer(object):
     def __call__(self, dataloaders, n_epochs, model_dir):
         self.set_device()
         self.model_path = model_dir
+        if not os.path.exists(model_dir):
+            os.makedirs(model_dir)
 
         if self.logger is None:
             self.logger = logging.getLogger(__name__)

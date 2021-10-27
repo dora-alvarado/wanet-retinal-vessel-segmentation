@@ -1,3 +1,10 @@
+def get_dataset_settings(name):
+    return dict(
+        DRIVE = drive_settings,
+        STARE = stare_settings,
+        CHASEDB = stare_settings
+    )[name]
+
 def drive_settings(home_dir):
     settings = {}
     settings['path_dataset'] = home_dir + 'DRIVE/'
