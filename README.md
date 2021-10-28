@@ -49,8 +49,12 @@ This structure can be modified in the file "./trainer/dataset_config_file.py".
 The model can be trained with:
 
 ```
-python main_train.py
+python main_train.py 
+python main_train.py -c config.txt
+python main_train.py --param param_value
 ```
+
+Execute "main_train.py -h" for more information on available parameters. First option use default parameter values, which can be modified in the file "./utils/settings.py", second option overrides default parameters with the specified in a configfile. Third option overrides default and configfile values. 
 
 If available, a GPU will be used. The following files will be saved in the folder "exp1" :
 - best model weights (model_best.pth.tar)
@@ -62,7 +66,10 @@ The model can be evaluated agains the test images from DRIVE with:
 
 ```
 python main_eval.py
+python main_eval.py -c config.txt
+python main_eval.py --param param_value
 ```
+Execute "main_eval.py -h" for more information on available parameters. First option use default parameter values, which can be modified in the file "./utils/settings.py", second option overrides default parameters with the specified in a configfile. Third option overrides default and configfile values. 
 
 If available, a GPU will be used. The following files will be saved in the folder "exp1" :
 - predictions (all_predictions.png)
