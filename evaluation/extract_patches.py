@@ -1,5 +1,6 @@
+import torch
 import torch.nn.functional as F
-import numpy as np
+
 
 def pad_overlap(img, patch_size, stride):
     # Calculate padding to fit the sliding windows
@@ -10,8 +11,9 @@ def pad_overlap(img, patch_size, stride):
 
 
 def unfold(img, patch_size, stride):
+    c, h, w = img.shape
     patches = img.unfold(1, patch_size, stride).unfold(2, patch_size, stride)
-    patches = patches.reshape((-1, 1, patch_size, patch_size))
+    patches = patches.reshape((-1, c, patch_size, patch_size))
     return patches
 
 
@@ -21,31 +23,29 @@ def patches_overlap (test_img, patch_size, stride):
     return patches_img_test, test_img.shape[1], test_img.shape[2]
 
 
+def fold(pred_patches, img_c, img_h, img_w, stride):
+    # https://stackoverflow.com/questions/62995726/pytorch-sliding-window-with-unfold-fold
+    # https://pytorch.org/docs/stable/nn.html#torch.nn.Fold
+    # input tensor must be of shape (b, c*(patch_size*patch_size), l), where l is the total number of patches
+    # b, c, l, patch_size*patch_size -->
+    b = 1
+    patch_size = pred_patches.shape[-1]
+    patches_reverse = torch.from_numpy(pred_patches).reshape((1, img_c, -1, patch_size**2))
+    # b, c, patch_size*patch_size, l -->
+    patches_reverse = patches_reverse.permute(0, 1, 3, 2)
+    # b, c*patch_size*patch_size, l -->
+    patches_reverse = patches_reverse.view(b, img_c*patch_size**2, -1)
+    output = F.fold(patches_reverse, output_size=(img_h, img_w), kernel_size=patch_size, stride=stride)
+    recovery_mask = F.fold(torch.ones_like(patches_reverse), output_size=(img_h, img_w), kernel_size=patch_size, stride=stride)
+    output = output / recovery_mask
+    return output.numpy()
+
+
 def recompone_overlap(pred_patches, img_h, img_w, stride):
-    patch_h = pred_patches.shape[2]
-    patch_w = pred_patches.shape[3]
+    n_patches, n_c, patch_h, patch_w = pred_patches.shape
     N_patches_h = (img_h - patch_h) // stride + 1
     N_patches_w = (img_w - patch_w) // stride + 1
     N_patches_img = N_patches_h * N_patches_w
-
     assert (pred_patches.shape[0] % N_patches_img == 0)
-    N_full_imgs = pred_patches.shape[0] // N_patches_img
-
-    full_prob = np.zeros((N_full_imgs, pred_patches.shape[1], img_h, img_w))
-    full_sum = np.zeros((N_full_imgs, pred_patches.shape[1], img_h, img_w))
-
-    k = 0  # iterator over all the patches
-    for i in range(N_full_imgs):
-        for h in range((img_h - patch_h) // stride + 1):
-            for w in range((img_w - patch_w) // stride + 1):
-                full_prob[i, :, h * stride:(h * stride) + patch_h, w * stride:(w * stride) + patch_w] += \
-                pred_patches[k]
-                full_sum[i, :, h * stride:(h * stride) + patch_h, w * stride:(w * stride) + patch_w] += 1
-                k += 1
-    assert (k == pred_patches.shape[0])
-    assert (np.min(full_sum) >= 1.0)  # at least one
-    final_avg = full_prob / full_sum
-    assert (np.max(final_avg) <= 1.0)  # max value for a pixel is 1.0
-    assert (np.min(final_avg) >= 0.0)  # min value for a pixel is 0.0
+    final_avg = fold(pred_patches, n_c, img_h, img_w, stride)
     return final_avg
-#assert(np.max(test_mask)==1  and np.min(test_mask)==0)

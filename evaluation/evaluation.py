@@ -8,7 +8,7 @@ import logging
 
 class Evaluation(object):
 
-    def __init__(self, model, patch_size, batch_size=32, stride=5, logfile_path = './performance.log'):
+    def __init__(self, model, patch_size, batch_size=32, stride=5):
         self.model = model
         self.patch_size = patch_size
         self.batch_size = batch_size
@@ -16,11 +16,9 @@ class Evaluation(object):
         self.use_cuda = torch.cuda.is_available()
         self.device = torch.device("cuda:0" if self.use_cuda else "cpu")
         self.lst_predictions = None
-        self.logfile_path = logfile_path
-        self.logger = logging.getLogger(__name__)
-        self.init_logger(logfile_path)
 
     def init_logger(self, logfile_path):
+        self.logger = logging.getLogger(__name__)
         self.logger.setLevel(logging.DEBUG)
         # create console handler and set level to debug
         ch = logging.FileHandler(logfile_path, mode='w', encoding='utf-8')
@@ -74,17 +72,23 @@ class Evaluation(object):
         y_true = np.asarray(y_true).reshape(-1)
 
         metrics = performance(y_scores, y_true)
-        str1 = ['%s: %.4f ' % item for item in metrics.items()]
+        str1 = ['%s: %.6f ' % item for item in metrics.items()]
         self.logger.info('%s', '\n'.join(str1))
+        self.logger.handlers[0].stream.close()
+        self.logger.removeHandler(self.logger.handlers[0])
+
         return metrics
 
-    def __call__(self, dataset, n_imgs, inside_FoV=True):
+    def __call__(self, dataset, n_imgs, inside_FoV=True, logfile_path = './performance.log'):
+        self.logfile_path = logfile_path
+        self.init_logger(self.logfile_path)
         self.lst_predictions = []
         for i in range(n_imgs):
             img = dataset.lst_imgs[i]
+            fov = dataset.lst_fovs[i, :, :, 0]
             # Transform to tensor
             img = TF.to_tensor(img)
-            predict_img = self.predict_img(img)
+            predict_img = self.predict_img(img)*fov
             self.lst_predictions.append(predict_img)
         self.lst_predictions = np.asarray(self.lst_predictions)
         self.eval_performance(dataset, inside_FoV)
