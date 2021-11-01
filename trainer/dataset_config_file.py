@@ -2,7 +2,7 @@ def get_dataset_settings(name):
     return dict(
         DRIVE = drive_settings,
         STARE = stare_settings,
-        CHASEDB = stare_settings
+        CHASEDB = chasedb_settings
     )[name]
 
 def drive_settings(home_dir):
@@ -44,7 +44,7 @@ def chasedb_settings(home_dir):
     settings['path_test_gts'] = settings['path_dataset'] + 'test/manual'
     settings['path_train_fovs'] = settings['path_dataset'] + 'training/mask'
     settings['path_test_fovs'] = settings['path_dataset'] + 'test/mask'
-    settings['image_ext'] = '.ppm'
+    settings['image_ext'] = '.jpg'
     settings['gt_ext'] = '_1stHO.png'
     settings['fov_ext'] = '.png'
     return settings
