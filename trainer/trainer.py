@@ -126,6 +126,8 @@ class Trainer(object):
             self.logger.info("=> no checkpoint found at '%s'", model_path)
 
     def init_logger(self, path):
+        for handler in logging.root.handlers[:]:
+            logging.root.removeHandler(handler)    
         filemode = 'w' if self.start_epoch==0 else 'a'
         self.logger.setLevel(logging.DEBUG)
         # create console handler and set level to debug
