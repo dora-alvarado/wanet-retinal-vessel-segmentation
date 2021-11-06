@@ -13,7 +13,8 @@ def pad_overlap(img, patch_size, stride):
 def unfold(img, patch_size, stride):
     c, h, w = img.shape
     patches = img.unfold(1, patch_size, stride).unfold(2, patch_size, stride)
-    patches = patches.reshape((-1, c, patch_size, patch_size))
+    patches = patches.reshape((c, -1, patch_size, patch_size))
+    patches = patches.permute(1, 0, 2, 3)
     return patches
 
 
