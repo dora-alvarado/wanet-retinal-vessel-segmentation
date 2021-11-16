@@ -67,11 +67,11 @@ class RetinaDataset(Dataset):
             self.lst_imgs.append(img)
             self.lst_gts.append(mask)
 
-        self.lst_imgs = np.asarray(self.lst_imgs)
-        self.lst_gts = np.asarray(self.lst_gts)
-        self.lst_fovs = np.asarray(self.lst_fovs)
+        self.lst_imgs = np.asarray(self.lst_imgs, dtype=np.float64)
+        self.lst_gts = np.asarray(self.lst_gts, dtype=np.float64)
+        self.lst_fovs = np.asarray(self.lst_fovs, dtype=np.float64)
         # global normalization
-        self.lst_imgs = self.data_normalization(self.lst_imgs, max_val=1., dtype=np.float)
+        self.lst_imgs = self.data_normalization(self.lst_imgs, max_val=1., dtype=np.float64)
         self.n_imgs = len(self.lst_img_filenames)
 
     def preproc(self, image):
@@ -114,6 +114,17 @@ class RetinaDataset(Dataset):
         if random.random() > (1.-prob):
             image = TF.vflip(image)
             mask = TF.vflip(mask)
+
+        if random.random() > (1. - prob):
+            angle = transforms.RandomRotation.get_params(degrees=(0, 180))
+            image = TF.rotate(image, angle=angle)
+            mask = TF.rotate(mask, angle=angle)
+
+        # Random Gaussian blur
+        if random.random() > (1. - prob):
+            sigma = transforms.GaussianBlur.get_params(0.1, 5)
+            # only applied to image, mask should remain the same
+            image = TF.gaussian_blur(image, kernel_size=(5,5), sigma=(sigma, sigma))
 
         return image, mask
 

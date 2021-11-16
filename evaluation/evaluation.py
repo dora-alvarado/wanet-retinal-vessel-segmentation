@@ -2,6 +2,8 @@ import torch
 import torch.nn.functional as F
 import torchvision.transforms.functional as TF
 import numpy as np
+import os
+import cv2
 from .extract_patches import patches_overlap, recompone_overlap
 from .performance import performance
 import logging
@@ -79,16 +81,24 @@ class Evaluation(object):
 
         return metrics
 
-    def __call__(self, dataset, n_imgs, inside_FoV=True, logfile_path = './performance.log'):
+    def __call__(self, dataset, n_imgs, inside_FoV=False, logfile_path = './performance.log'):
         self.logfile_path = logfile_path
         self.init_logger(self.logfile_path)
         self.lst_predictions = []
+        dirname = os.path.dirname(logfile_path)
         for i in range(n_imgs):
             img = dataset.lst_imgs[i]
-            fov = dataset.lst_fovs[i, :, :, 0]
+            fname_img = dataset.lst_img_filenames[i]
+            fname, fname_ext = os.path.splitext(fname_img)
             # Transform to tensor
             img = TF.to_tensor(img)
-            predict_img = self.predict_img(img)*fov
+            if hasattr(dataset.__class__, 'lst_fovs'):
+                fov = dataset.lst_fovs[i, :, :, 0]
+                predict_img = self.predict_img(img) * fov
+            else:
+                predict_img = self.predict_img(img)
+            print(dirname + '/' + fname+'.png')
+            cv2.imwrite(dirname + '/' + fname+'.png', (predict_img*255).astype(np.uint8))
             self.lst_predictions.append(predict_img)
-        self.lst_predictions = np.asarray(self.lst_predictions)
-        self.eval_performance(dataset, inside_FoV)
+        self.lst_predictions = np.asarray(self.lst_predictions, dtype=np.float64)
+        self.eval_performance(dataset, inside_FoV=inside_FoV)

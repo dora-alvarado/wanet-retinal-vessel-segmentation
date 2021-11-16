@@ -4,9 +4,11 @@ from sklearn.metrics import confusion_matrix
 from sklearn.metrics import precision_recall_curve
 from sklearn.metrics import accuracy_score
 from sklearn.metrics import f1_score
+from sklearn.metrics import jaccard_score
 import numpy as np
 
-def performance(y_scores, y_true, threshold = 0.5):
+
+def performance(y_scores, y_true, threshold=0.5):
     # AUC-ROC
     fpr, tpr, thresholds = roc_curve((y_true), y_scores)
     AUC_ROC = roc_auc_score(y_true, y_scores)
@@ -15,7 +17,7 @@ def performance(y_scores, y_true, threshold = 0.5):
     precision = np.fliplr([precision])[0]  # so the array is increasing (you won't get negative AUC)
     recall = np.fliplr([recall])[0]  # so the array is increasing (you won't get negative AUC)
     AUC_prec_rec = np.trapz(precision, recall)
-    y_pred = np.asarray(y_scores >= threshold, dtype=np.int)  # np.empty((y_scores.shape[0]))
+    y_pred = np.asarray(y_scores >= threshold, dtype=np.int32)  # np.empty((y_scores.shape[0]))
 
     confusion = confusion_matrix(y_true, y_pred)
     tn, fp, fn, tp = confusion.ravel()
@@ -36,11 +38,13 @@ def performance(y_scores, y_true, threshold = 0.5):
 
     # F1 score
     F1_score = f1_score(y_true, y_pred, labels=None, average='binary', sample_weight=None)
+    jaccard = jaccard_score(y_true, y_pred, labels=None, average='binary', sample_weight=None)
 
     metrics = {
         'AUC_ROC': AUC_ROC,
         'AUC_PrR': AUC_prec_rec,
         'F1_score': F1_score,
+        'Jaccard_score': jaccard,
         #'Confusion_matrix': confusion,
         'Accuracy': acc_index,
         'Sensitivity': sensitivity,

@@ -13,7 +13,7 @@ def edge_conv2d(im, in_ch, out_ch):
     # Use nn.Conv2d to define the convolution operation
     conv_op = nn.Conv2d(3, 3, kernel_size=3, padding=1, bias=False)
     # Define the sobel operator parameters
-    sobel_kernel = np.array([[-1, 0, 1], [-2, 0, 2], [-1, 0, 1]], dtype=np.float)
+    sobel_kernel = np.array([[-1, 0, 1], [-2, 0, 2], [-1, 0, 1]], dtype=np.float64)
     # Convert the sobel operator into a convolution kernel adapted to the convolution operation
     sobel_kernel = sobel_kernel.reshape((1, 1, 3, 3))
     # Convolution output channel, here I set it to 3
@@ -223,7 +223,7 @@ class ApplyDGMF(nn.Module):
         # prepare kernel
         idx_x = torch.arange(self.kernel_size[1], dtype=x.dtype)
         idx_y = torch.arange(self.kernel_size[0], dtype=x.dtype)
-        grid_x, grid_y = torch.meshgrid(idx_x, idx_y)
+        grid_x, grid_y = torch.meshgrid(idx_x, idx_y) # in future versions, it will be needed to add indexing = 'ij'
         grid_x = grid_x.repeat(1, 1, 1).to(x.device)
         grid_y = grid_y.repeat(1, 1, 1).to(x.device)
 
@@ -236,7 +236,7 @@ class ApplyDGMF(nn.Module):
             kernel = kernel.repeat(1, c, 1, 1)
             # get D-GMF (distorted filter)
             kernel = remap(kernel, grid_x + self.dx * 10 * self.alphas[i],
-                           grid_y + self.dy * 10 * self.alphas[i])
+                           grid_y + self.dy * 10 * self.alphas[i], align_corners=False)
             kernels.append(kernel)
         self.kernels = torch.cat(kernels, dim=0)
 

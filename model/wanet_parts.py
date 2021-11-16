@@ -11,13 +11,13 @@ def double_conv(in_channels, out_channels, p_dropout=0.2, padding=1,
     if batchnorm:
         layers.append(nn.BatchNorm2d(out_channels))
     if activation:
-        layers.append(nn.ReLU(inplace=True))
+        layers.append(nn.ReLU(inplace=False))
     layers.append(nn.Dropout2d(p=p_dropout))
     layers.append(nn.Conv2d(out_channels, out_channels, 3, padding=padding, groups=1))
     if batchnorm:
         layers.append(nn.BatchNorm2d(out_channels))
     if activation:
-        layers.append(nn.ReLU(inplace=True))
+        layers.append(nn.ReLU(inplace=False))
 
     return nn.Sequential(*layers)
 

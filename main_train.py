@@ -23,7 +23,7 @@ if __name__=='__main__':
     listOfFiles_imgs = np.asarray([name for name in listOfFiles_imgs if name.endswith(dataset_config['image_ext'])])
 
     percent_validation = 0.1
-    all_idx = np.asarray(range(len(listOfFiles_imgs)), dtype=np.int)
+    all_idx = np.asarray(range(len(listOfFiles_imgs)), dtype=np.int32)
     idx_train_imgs, idx_val_imgs = train_test_split(all_idx, test_size=percent_validation, random_state=0)
 
     img_filenames = {
