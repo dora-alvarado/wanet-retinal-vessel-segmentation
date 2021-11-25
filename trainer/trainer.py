@@ -96,6 +96,8 @@ class Trainer(object):
             'best_loss': self.best_loss,
             'optimizer': self.optimizer.state_dict(),
         }
+        if self.scheduler is not None:
+            state['scheduler']= self.scheduler.state_dict()
         # save
         if not os.path.exists(model_dir):
             os.makedirs(model_dir)
@@ -119,6 +121,8 @@ class Trainer(object):
             self.start_epoch = state['epoch']+1
             self.model.load_state_dict(state['state_dict'])
             self.optimizer.load_state_dict(state['optimizer'])
+            if self.scheduler is not None:
+                self.scheduler.load_state_dict(state['scheduler'])
             self.best_metric = state['best_metric']
             self.best_loss = state['best_loss']
             self.logger.info("=> loaded checkpoint '%s' (epoch %d)", model_path, state['epoch'] + 1)
