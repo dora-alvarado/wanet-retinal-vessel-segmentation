@@ -66,7 +66,7 @@ class CAM(Module):
         proj_query = x.view(m_batchsize, C, -1)
         n = proj_query.shape[-1]
         avg = torch.mean(proj_query, dim=2, keepdim=True).repeat([1,1,proj_query.shape[-1]])
-        proj_query -=avg
+        proj_query = proj_query - avg
         proj_key = proj_query.permute(0, 2, 1)
         energy = torch.bmm(1/n*proj_query, proj_key)
         attention = self.softmax(energy)
