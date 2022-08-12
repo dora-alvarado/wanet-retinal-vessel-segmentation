@@ -1,13 +1,27 @@
 # WA-Net (Retinal Vessel Segmentation)
-PyTorch implementation of WA-Net, based on preprint paper "Width Attention based Convolutional Neural Network for Retinal Vessel Segmentation" (submitted to the journal "Expert Systems with Applications" on October, 25th)
+PyTorch implementation of WA-Net, based on journal paper "Width Attention based Convolutional Neural Network for Retinal Vessel Segmentation" (published in "Expert Systems with Applications" on August, 2022)
+
+If you use this code please cite the paper using the bibtex reference below.
+
+```
+@article{alvarado2022wanet,
+title = {Width Attention based Convolutional Neural Network for Retinal Vessel Segmentation},
+journal = {Expert Systems with Applications},
+volume = {209},
+pages = {118313},
+year = {2022},
+issn = {0957-4174},
+doi = {https://doi.org/10.1016/j.eswa.2022.118313},
+url = {https://www.sciencedirect.com/science/article/pii/S0957417422014439},
+author = {Dora E. Alvarado-Carrillo and Oscar S. Dalmau-Cedeño},
+}
+```
 
 ![](figures/graphical_abstract.png)
 
 ## Abstract
 
-The analysis of the vascular tree is a fundamental part of the clinical assessment of retinal images. The diversity of blood vessel calibers and curvatures, as well as the ocular vascular alterations derived from the progress of certain diseases, make automatic blood vessel segmentation a challenging task. In this paper, a novel Width Attention-based Convolutional Neural Network, called WA-Net, is proposed. 
-In the WA-Net, a fundus image is decomposed into multiple channels by a layer of Distorted Second-Order Differential Gaussian Match Filters (DSD-GMF), where each channel is associated with a vessel width. Subsequently, the channel relevance is weighted through the Width Attention Module (WAM), which considers both channel and position correlations. Finally, in order to specialize the feature maps with a concrete vessel-width category, either thin-vessel or thick-vessel related, the weighted channels are divided into two groups by the Two-Stream Block, composed of three-level UNet streams.
-Experimental results on three public datasets (DRIVE/STARE/CHASE) indicate that the proposed method provides a performance gain over other attention-based and non-attention-based architectures, achieving state-of-the-art Accuracy and Area-Under-the-Receiver-Operating-Characteristic-Curve scores (0.9575/0.9665/9653 and 0.9784/0.9865/0.9841 within the Field-of-View, respectively). 
+The analysis of the vascular tree is a fundamental part of the clinical assessment of retinal images. The diversity of blood vessel calibers and curvatures, as well as the ocular vascular alterations derived from the progress of certain diseases, make automatic blood vessel segmentation a challenging task. In this paper, a novel Width Attention-based Convolutional Neural Network, called WA-Net, is proposed. In the WA-Net, a fundus image is decomposed into multiple channels by a layer of Distorted Second-Order Differential Gaussian Matched Filters (DSD-GMF), where each channel is associated with a blood-vessel width. Subsequently, the channel relevance is weighted through the Width Attention Module (WAM), which considers channel and position correlations. Finally, in order to specialize the feature maps with a concrete vessel-width category, either thin-vessel or thick-vessel related, the weighted channels are divided into two groups by the Two-Stream Block, composed of three-level UNet streams. Experimental results on three public datasets (DRIVE/STARE/CHASE) indicate that the proposed method provides a performance gain over other attention-based and non-attention-based architectures, achieving state-of-the-art Accuracy and Area-Under-the-Receiver-Operating-Characteristic-Curve scores (0.9575/0.9665/9653 and 0.9784/0.9865/0.9841 within the Field-of-View, respectively).
 
 ## Prerequisities
 The neural network is developed with the Pytorch and Kornia libraries, we refer to [Pytorch website](https://pytorch.org/) and [Kornia Repository](https://github.com/kornia/kornia) for the installation.
