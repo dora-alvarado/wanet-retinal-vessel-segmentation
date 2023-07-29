@@ -5,8 +5,8 @@ experiment = ./test_DRIVE/
 crop_size = 48
 
 [TRAINING]
-num_patches = 50
-num_epochs = 5
+num_patches = 25000
+num_epochs = 50
 batch_size = 32
 optimizer = AdamW
 learning_rate = 1e-3
